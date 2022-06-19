@@ -94,7 +94,7 @@ contract BaseVault is IVault, Capped {
      * @dev See {IVault-withdrawFeeRatio}.
      */
     function withdrawFeeRatio() public view override returns(uint256) {
-        return configuration.getParameter("WITHDRAW_FEE_RATIO");
+        return configuration.getParameter(address(this), "WITHDRAW_FEE_RATIO");
     }
 
     /**
@@ -181,7 +181,7 @@ contract BaseVault is IVault, Capped {
      * @dev See {IVault-controller}.
      */
     function controller() public view returns(address) {
-        return configuration.getParameter("VAULT_CONTROLLER").toAddress();
+        return configuration.getParameter(address(this), "VAULT_CONTROLLER").toAddress();
     }
 
     /**
