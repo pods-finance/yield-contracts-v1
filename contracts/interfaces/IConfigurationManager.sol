@@ -1,4 +1,5 @@
-//SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: UNLICENSED
+
 pragma solidity >=0.8.6;
 
 interface IConfigurationManager {
@@ -8,8 +9,10 @@ interface IConfigurationManager {
     error ConfigurationManager__InvalidCapTarget();
 
     function setParameter(address target, bytes32 name, uint256 value) external;
+
     function getParameter(address target, bytes32 name) external view returns (uint256);
     function getGlobalParameter(bytes32 name) external view returns (uint256);
     function setCap(address target, uint256 value) external;
+
     function getCap(address target) external view returns (uint256);
 }

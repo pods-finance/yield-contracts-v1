@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
+
 pragma solidity >=0.8.6;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -6,11 +7,20 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 library TransferUtils {
     error TransferUtils__TransferDidNotSucceed();
 
-    function safeTransfer(IERC20 token, address to, uint value) internal {
+    function safeTransfer(
+        IERC20 token,
+        address to,
+        uint256 value
+    ) internal {
         _callOptionalReturn(token, abi.encodeWithSelector(token.transfer.selector, to, value));
     }
 
-    function safeTransferFrom(IERC20 token, address from, address to, uint value) internal {
+    function safeTransferFrom(
+        IERC20 token,
+        address from,
+        address to,
+        uint256 value
+    ) internal {
         _callOptionalReturn(token, abi.encodeWithSelector(token.transferFrom.selector, from, to, value));
     }
 

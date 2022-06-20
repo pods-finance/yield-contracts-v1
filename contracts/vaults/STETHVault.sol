@@ -1,4 +1,5 @@
-//SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: UNLICENSED
+
 pragma solidity >=0.8.6;
 
 import "./BaseVault.sol";
@@ -30,25 +31,20 @@ contract STETHVault is BaseVault {
 
     constructor(
         IConfigurationManager _configuration,
-        address _asset,
+        IERC20Metadata _asset,
         address _investor
     ) BaseVault(_configuration, _asset) {
         investor = _investor;
         sharePriceDecimals = asset.decimals();
     }
 
-    /**
-     * @dev See {IVault-name}.
-     */
-    function name() external pure override returns (string memory) {
-        return "stETH Vault";
-    }
-
     function _afterRoundStart(uint256) internal override {
+        uint256 supply = totalSupply();
+
         lastRoundAssets = totalAssets();
         lastSharePrice = FixedPointMath.Fractional({
-            numerator: totalShares == 0 ? 0 : lastRoundAssets,
-            denominator: totalShares
+            numerator: supply == 0 ? 0 : lastRoundAssets,
+            denominator: supply
         });
 
         uint256 sharePrice = lastSharePrice.denominator == 0 ? 0 : lastSharePrice.mulDivDown(10**sharePriceDecimals);
@@ -60,9 +56,10 @@ contract STETHVault is BaseVault {
         uint256 endSharePrice;
         uint256 investmentYield = asset.balanceOf(investor);
         uint256 idleAssets = asset.balanceOf(address(this));
+        uint256 supply = totalSupply();
 
-        if (totalShares != 0) {
-            endSharePrice = (totalAssets() + investmentYield).mulDivDown(10**sharePriceDecimals, totalShares);
+        if (supply != 0) {
+            endSharePrice = (totalAssets() + investmentYield).mulDivDown(10**sharePriceDecimals, supply);
             roundAccruedInterest = totalAssets() - lastRoundAssets;
 
             // Pulls the yields from investor

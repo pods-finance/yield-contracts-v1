@@ -6,7 +6,9 @@
     "lint": "yarn lint:ts && yarn solhint",
     "lint:ts": "ts-standard",
     "test": "hardhat test",
-    "postinstall": "husky install"
+    "postinstall": "husky install",
+    "prettier": "./node_modules/.bin/prettier contracts/**/*.sol",
+    "prettier:fix": "./node_modules/.bin/prettier --write contracts/**/*.sol"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.5",
@@ -26,7 +28,9 @@
     "ethers": "^5.5.4",
     "hardhat": "^2.8.4",
     "hardhat-abi-exporter": "^2.9.0",
+    "hardhat-contract-sizer": "^2.5.1",
     "hardhat-gas-reporter": "^1.0.7",
+    "hardhat-spdx-license-identifier": "^2.0.3",
     "husky": "^8.0.1",
     "prettier": "^2.5.1",
     "prettier-plugin-solidity": "^1.0.0-beta.19",
@@ -42,5 +46,6 @@
   },
   "engines": {
     "node": ">=16.14.0"
-  }
+  },
+  "license": "UNLICENSED"
 }

@@ -1,35 +1,35 @@
-//SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: UNLICENSED
+
 pragma solidity >=0.8.6;
 
 import "../libs/DepositQueueLib.sol";
-
 
 contract DepositQueueMock {
     using DepositQueueLib for DepositQueueLib.DepositQueue;
 
     DepositQueueLib.DepositQueue private depositQueue;
 
-    function push(uint amount) external {
+    function push(uint256 amount) external {
         depositQueue.push(DepositQueueLib.DepositEntry(msg.sender, amount));
     }
 
-    function remove(uint startIndex, uint endIndex) external {
+    function remove(uint256 startIndex, uint256 endIndex) external {
         depositQueue.remove(startIndex, endIndex);
     }
 
-    function get(uint index) external view returns(DepositQueueLib.DepositEntry memory) {
+    function get(uint256 index) external view returns (DepositQueueLib.DepositEntry memory) {
         return depositQueue.get(index);
     }
 
-    function balanceOf(address owner) external view returns(uint) {
+    function balanceOf(address owner) external view returns (uint256) {
         return depositQueue.balanceOf(owner);
     }
 
-    function size() external view returns(uint) {
+    function size() external view returns (uint256) {
         return depositQueue.size();
     }
 
-    function totalDeposited() external view returns(uint) {
+    function totalDeposited() external view returns (uint256) {
         return depositQueue.totalDeposited;
     }
 }

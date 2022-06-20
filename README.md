@@ -3,11 +3,11 @@
 
 <p align="center">
   <a href="https://github.com/pods-finance/lisbon/actions?query=workflow:test">
-    <img src="https://github.com/pods-finance/lisbon/workflows/lint+compile+test/badge.svg" alt="test"/>
+    <img src="https://github.com/pods-finance/yield-contracts/workflows/lint+compile+test/badge.svg" alt="test"/>
   </a>
   
-  <a href='https://coveralls.io/github/pods-finance/lisbon?branch=main'>
-    <img src='https://coveralls.io/repos/github/pods-finance/lisbon/badge.svg?branch=main&t=WGkNnv' alt='Coverage Status' />
+  <a href='https://coveralls.io/github/pods-finance/yield-contracts?branch=main'>
+    <img src='https://coveralls.io/repos/github/pods-finance/yield-contracts/badge.svg?branch=main&amp;t=WNIoc0' alt='Coverage Status' />
   </a>
 
   <a href="http://gplv3.fsf.org/">
@@ -22,7 +22,7 @@ A) Allocate users deposits to a Yield Source (Lido, AAVE, AMM Pools). At the mom
 
 B) Each week, invest part of the yield generated weekly to buy weekly Call Options on ETH 10-20% _out-of-the-money_
 
-By doing so, you don't depositor won't risk their principal amount and only take risks with the yield. This type of strategy is called Principal Protected.
+By doing so, the depositor won't risk their principal amount and only take risks with the yield. This type of strategy is called Principal Protected.
 
 # Points of centralization
 
