@@ -69,8 +69,8 @@ abstract contract BaseVault is IVault, ERC20, ERC20Permit, Capped {
         if (shares == 0) revert IVault__ZeroShares();
         _spendCap(shares);
 
-        asset.safeTransferFrom(msg.sender, address(this), assets);
         depositQueue.push(DepositQueueLib.DepositEntry(receiver, assets));
+        asset.safeTransferFrom(msg.sender, address(this), assets);
 
         emit Deposit(receiver, assets);
     }
@@ -81,11 +81,10 @@ abstract contract BaseVault is IVault, ERC20, ERC20Permit, Capped {
     function mint(uint256 shares, address receiver) public virtual override returns (uint256 assets) {
         if (isProcessingDeposits) revert IVault__ForbiddenWhileProcessingDeposits();
         assets = previewMint(shares);
-
         _spendCap(shares);
 
-        asset.safeTransferFrom(msg.sender, address(this), assets);
         depositQueue.push(DepositQueueLib.DepositEntry(receiver, assets));
+        asset.safeTransferFrom(msg.sender, address(this), assets);
 
         emit Deposit(receiver, assets);
     }
