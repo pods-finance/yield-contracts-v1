@@ -271,10 +271,10 @@ abstract contract BaseVault is IVault, ERC20, ERC20Permit, Capped {
         if (!isProcessingDeposits) revert IVault__NotProcessingDeposits();
 
         isProcessingDeposits = false;
+        processedDeposits = 0;
 
         uint256 idleBalance = asset.balanceOf(address(this));
         _afterRoundStart(idleBalance);
-        processedDeposits = 0;
 
         emit StartRound(currentRoundId, idleBalance);
     }
@@ -287,7 +287,6 @@ abstract contract BaseVault is IVault, ERC20, ERC20Permit, Capped {
 
         isProcessingDeposits = true;
         _afterRoundEnd();
-        processedDeposits = totalAssets();
 
         emit EndRound(currentRoundId++);
     }
@@ -298,9 +297,10 @@ abstract contract BaseVault is IVault, ERC20, ERC20Permit, Capped {
     function processQueuedDeposits(uint256 startIndex, uint256 endIndex) public {
         if (!isProcessingDeposits) revert IVault__NotProcessingDeposits();
 
+        uint256 currentAssets = totalAssets() + processedDeposits;
         for (uint256 i = startIndex; i < endIndex; i++) {
             DepositQueueLib.DepositEntry memory depositEntry = depositQueue.get(i);
-            _processDeposit(depositEntry);
+            _processDeposit(depositEntry, currentAssets);
             processedDeposits += depositEntry.amount;
         }
         depositQueue.remove(startIndex, endIndex);
@@ -311,10 +311,10 @@ abstract contract BaseVault is IVault, ERC20, ERC20Permit, Capped {
     /**
      * @notice Mint new shares, effectively representing user participation in the Vault.
      */
-    function _processDeposit(DepositQueueLib.DepositEntry memory depositEntry) internal virtual {
+    function _processDeposit(DepositQueueLib.DepositEntry memory depositEntry, uint256 currentAssets) internal virtual {
         uint256 supply = totalSupply();
         uint256 assets = depositEntry.amount;
-        uint256 shares = processedDeposits == 0 || supply == 0 ? assets : assets.mulDivUp(supply, processedDeposits);
+        uint256 shares = currentAssets == 0 || supply == 0 ? assets : assets.mulDivUp(supply, currentAssets);
         _mint(depositEntry.owner, shares);
         emit DepositProcessed(depositEntry.owner, currentRoundId, assets, shares);
     }
