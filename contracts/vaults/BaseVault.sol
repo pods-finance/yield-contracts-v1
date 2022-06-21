@@ -31,6 +31,7 @@ abstract contract BaseVault is IVault, ERC20, ERC20Permit, Capped {
 
     uint256 public constant DENOMINATOR = 10000;
     uint256 public constant WITHDRAW_FEE = 100;
+    uint256 public processedDeposits = 0;
 
     DepositQueueLib.DepositQueue private depositQueue;
 
@@ -273,6 +274,7 @@ abstract contract BaseVault is IVault, ERC20, ERC20Permit, Capped {
 
         uint256 idleBalance = asset.balanceOf(address(this));
         _afterRoundStart(idleBalance);
+        processedDeposits = 0;
 
         emit StartRound(currentRoundId, idleBalance);
     }
@@ -285,6 +287,7 @@ abstract contract BaseVault is IVault, ERC20, ERC20Permit, Capped {
 
         isProcessingDeposits = true;
         _afterRoundEnd();
+        processedDeposits = totalAssets();
 
         emit EndRound(currentRoundId++);
     }
@@ -295,10 +298,9 @@ abstract contract BaseVault is IVault, ERC20, ERC20Permit, Capped {
     function processQueuedDeposits(uint256 startIndex, uint256 endIndex) public {
         if (!isProcessingDeposits) revert IVault__NotProcessingDeposits();
 
-        uint256 processedDeposits = totalAssets();
         for (uint256 i = startIndex; i < endIndex; i++) {
             DepositQueueLib.DepositEntry memory depositEntry = depositQueue.get(i);
-            _processDeposit(depositEntry, processedDeposits);
+            _processDeposit(depositEntry);
             processedDeposits += depositEntry.amount;
         }
         depositQueue.remove(startIndex, endIndex);
@@ -309,10 +311,7 @@ abstract contract BaseVault is IVault, ERC20, ERC20Permit, Capped {
     /**
      * @notice Mint new shares, effectively representing user participation in the Vault.
      */
-    function _processDeposit(DepositQueueLib.DepositEntry memory depositEntry, uint256 processedDeposits)
-        internal
-        virtual
-    {
+    function _processDeposit(DepositQueueLib.DepositEntry memory depositEntry) internal virtual {
         uint256 supply = totalSupply();
         uint256 assets = depositEntry.amount;
         uint256 shares = processedDeposits == 0 || supply == 0 ? assets : assets.mulDivUp(supply, processedDeposits);
