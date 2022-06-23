@@ -298,8 +298,8 @@ abstract contract BaseVault is IVault, ERC20, ERC20Permit, Capped {
     function processQueuedDeposits(uint256 startIndex, uint256 endIndex) public {
         if (!isProcessingDeposits) revert IVault__NotProcessingDeposits();
 
-        uint256 currentAssets = totalAssets() + processedDeposits;
         for (uint256 i = startIndex; i < endIndex; i++) {
+            uint256 currentAssets = totalAssets() + processedDeposits;
             DepositQueueLib.DepositEntry memory depositEntry = depositQueue.get(i);
             _processDeposit(depositEntry, currentAssets);
             processedDeposits += depositEntry.amount;
