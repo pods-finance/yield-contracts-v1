@@ -22,7 +22,7 @@ contract STETH is Asset {
 }
 
 library String {
-    function equal(string memory a, string memory b) internal pure returns(bool) {
+    function equal(string memory a, string memory b) internal pure returns (bool) {
         return keccak256(bytes(a)) == keccak256(bytes(b));
     }
 }
@@ -31,6 +31,7 @@ contract STETHVaultInvariants is STETHVault {
     ConfigurationManager public $configuration = new ConfigurationManager();
     STETH public $asset = new STETH();
     InvestorActorMock public $investor = new InvestorActorMock(address($asset));
+    mapping(address => uint256) initialDeposits;
 
     constructor() STETHVault($configuration, $asset, address($investor)) {
         $configuration.setParameter(address(this), "VAULT_CONTROLLER", 0x30000);
@@ -46,5 +47,67 @@ contract STETHVaultInvariants is STETHVault {
 
     function echidna_test_decimals() public returns(bool) {
         return decimals() == $asset.decimals();
+    }
+
+    function increaseInterest() public {
+        uint addInterest = (totalAssets() /10 );
+        yieldSource.generateInterest(addInterest);
+    }
+
+    function echidna_withdraw_always_bigger_than_deposit() public returns(bool){
+       return  WITHDRAW + FEES >= DEPOSIT;
+    }
+
+    function depositAndStore(uint a) public {
+        deposit(a)
+        initialDeposits(msg.sender, a);
+    }
+
+    //  ["0x10000", "0x20000", "0x30000"]
+    function echidna_sum_total_supply() public returns (bool) {
+        uint256 balanceA = balanceOf(address(0x10000));
+        uint256 balanceB = balanceOf(address(0x20000));
+        uint256 balanceC = balanceOf(address(0x30000));
+
+        uint256 sumBalances = balanceA + balanceB + balanceC;
+
+        return sumBalances == totalSupply();
+    }
+
+    function helpDeploy() public {
+        uint256 startIndex = 0;
+        uint256 endIndex = depositQueueSize();
+        processQueuedDeposits(startIndex, endIndex);
+    }
+
+    function deposit(uint256 assets, address) public override returns (uint256 shares) {
+        super.deposit(assets, msg.sender);
+    }
+
+    function mint(uint256 shares, address) public override returns (uint256 assets) {
+        super.mint(shares, msg.sender);
+    }
+
+    function transfer(address to, uint256 amount) public override returns (bool) {
+        address owner = _msgSender();
+        if (to != address(0x10000) || to != address(0x20000) || to != address(0x30000)) {
+            return false;
+        }
+        _transfer(owner, to, amount);
+        return true;
+    }
+
+    function transferFrom(
+        address from,
+        address to,
+        uint256 amount
+    ) public override returns (bool) {
+        address spender = _msgSender();
+        if (to != address(0x10000) || to != address(0x20000) || to != address(0x30000)) {
+            return false;
+        }
+        _spendAllowance(from, spender, amount);
+        _transfer(from, to, amount);
+        return true;
     }
 }
