@@ -6,6 +6,7 @@ import "../../contracts/mocks/Asset.sol";
 import "../../contracts/vaults/STETHVault.sol";
 import "../../contracts/configuration/ConfigurationManager.sol";
 import "../../contracts/mocks/InvestorActorMock.sol";
+import "../../contracts/mocks/YieldSourceMock.sol";
 
 contract STETH is Asset {
     constructor() Asset("Liquid staked Ether 2.0", "stETH") {}
@@ -18,6 +19,10 @@ contract STETH is Asset {
         _mint(from, amount);
         _transfer(from, to, amount);
         return true;
+    }
+
+    function generateInterest(uint256 interest) public {
+        _mint(msg.sender, interest);
     }
 }
 
@@ -37,30 +42,22 @@ contract STETHVaultInvariants is STETHVault {
         $configuration.setParameter(address(this), "VAULT_CONTROLLER", 0x30000);
     }
 
-    function echidna_test_name() public view returns(bool) {
+    function echidna_test_name() public view returns (bool) {
         return String.equal(name(), "Pods Yield stETH");
     }
 
-    function echidna_test_symbol() public returns(bool) {
+    function echidna_test_symbol() public returns (bool) {
         return String.equal(symbol(), "pystETH");
     }
 
-    function echidna_test_decimals() public returns(bool) {
+    function echidna_test_decimals() public returns (bool) {
         return decimals() == $asset.decimals();
     }
 
-    function increaseInterest() public {
-        uint addInterest = (totalAssets() /10 );
-        yieldSource.generateInterest(addInterest);
-    }
-
-    function echidna_withdraw_always_bigger_than_deposit() public returns(bool){
-       return  WITHDRAW + FEES >= DEPOSIT;
-    }
-
-    function depositAndStore(uint a) public {
-        deposit(a)
-        initialDeposits(msg.sender, a);
+    function generateInterest(uint256 a) public {
+        if (a == 0) return;
+        uint256 addInterest = (totalAssets() / a);
+        $asset.generateInterest(addInterest);
     }
 
     //  ["0x10000", "0x20000", "0x30000"]
