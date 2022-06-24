@@ -88,11 +88,11 @@ contract STETHVaultInvariants is STETHVault, FuzzyAddresses {
     }
 
     function deposit(uint256 assets, address) public override returns (uint256 shares) {
-        super.deposit(assets, msg.sender);
+        return super.deposit(assets, msg.sender);
     }
 
     function mint(uint256 shares, address) public override returns (uint256 assets) {
-        super.mint(shares, msg.sender);
+        return super.mint(shares, msg.sender);
     }
 
     function transfer(address to, uint256 amount) public override returns (bool) {
