@@ -33,19 +33,11 @@ library String {
 }
 
 contract FuzzyAddresses {
-<<<<<<< HEAD
     address public constant user0 = address(0x10000);
     address public constant user1 = address(0x20000);
     address public constant vaultController = address(0x30000);
 
     function _addressIsAllowed(address to) internal returns (bool) {
-=======
-    address constant public user0 = address(0x10000);
-    address constant public user1 = address(0x20000);
-    address constant public vaultController = address(0x30000);
-
-    function _addressIsAllowed(address to) internal returns(bool) {
->>>>>>> origin
         return to == user0 || to == user1 || to == vaultController;
     }
 }
