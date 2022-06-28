@@ -173,9 +173,7 @@ abstract contract BaseVault is IVault, ERC20, ERC20Permit, Capped {
      * @inheritdoc IERC4626
      */
     function previewWithdraw(uint256 assets) public view override returns (uint256) {
-        assets = assets - _getFee(assets);
-        uint256 supply = totalSupply();
-        return supply == 0 ? assets : assets.mulDivUp(supply, totalAssets());
+        return convertToShares(assets - _getFee(assets));
     }
 
     /**
@@ -220,7 +218,7 @@ abstract contract BaseVault is IVault, ERC20, ERC20Permit, Capped {
      * @inheritdoc IERC4626
      */
     function maxWithdraw(address owner) public view override returns (uint256) {
-        return convertToAssets(balanceOf(owner));
+        return previewWithdraw(balanceOf(owner));
     }
 
     /**
