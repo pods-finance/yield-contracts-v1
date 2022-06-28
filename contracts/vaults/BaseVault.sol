@@ -218,7 +218,7 @@ abstract contract BaseVault is IVault, ERC20, ERC20Permit, Capped {
      * @inheritdoc IERC4626
      */
     function maxWithdraw(address owner) public view override returns (uint256) {
-        return previewWithdraw(balanceOf(owner));
+        return previewRedeem(balanceOf(owner));
     }
 
     /**
