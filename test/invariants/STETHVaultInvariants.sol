@@ -36,7 +36,15 @@ contract STETHVaultInvariants is STETHVault {
     ConfigurationManager public $configuration = new ConfigurationManager();
     STETH public $asset = new STETH();
     InvestorActorMock public $investor = new InvestorActorMock(address($asset));
-    mapping(address => uint256) initialDeposits;
+    event AssertionFailed(bool);
+
+    struct LastDeposit {
+        uint256 amount;
+        uint256 roundId;
+        uint256 shares;
+    }
+
+    mapping(address => LastDeposit) public lastDeposits;
 
     constructor() STETHVault($configuration, $asset, address($investor)) {
         $configuration.setParameter(address(this), "VAULT_CONTROLLER", 0x30000);
@@ -71,18 +79,64 @@ contract STETHVaultInvariants is STETHVault {
         return sumBalances == totalSupply();
     }
 
-    function helpDeploy() public {
+    function helpDeploy(uint256 a) public {
+        if (a > depositQueueSize()) return;
         uint256 startIndex = 0;
-        uint256 endIndex = depositQueueSize();
+        uint256 endIndex = a;
         processQueuedDeposits(startIndex, endIndex);
     }
 
     function deposit(uint256 assets, address) public override returns (uint256 shares) {
+        uint256 createdShares = convertToShares(assets);
+        LastDeposit memory newDeposit = LastDeposit({ amount: assets, roundId: currentRoundId, shares: createdShares });
+        lastDeposits[msg.sender] = newDeposit;
         super.deposit(assets, msg.sender);
     }
 
     function mint(uint256 shares, address) public override returns (uint256 assets) {
+        uint256 assets2 = convertToAssets(shares);
+        LastDeposit memory newDeposit = LastDeposit({ amount: assets2, roundId: currentRoundId, shares: shares });
+        lastDeposits[msg.sender] = newDeposit;
         super.mint(shares, msg.sender);
+    }
+
+    function withdraw(
+        uint256 assets,
+        address,
+        address
+    ) public override returns (uint256 shares) {
+        bool isNextRound = currentRoundId == lastDeposits[msg.sender].roundId + 1;
+        super.withdraw(assets, msg.sender, msg.sender);
+
+        if (isNextRound && assets > 0) {
+            uint256 burnShares = previewWithdraw(assets);
+            if (burnShares <= lastDeposits[msg.sender].shares) {
+                bool condition = assets <= lastDeposits[msg.sender].amount;
+                if (!condition) {
+                    emit AssertionFailed(condition);
+                }
+            }
+        }
+    }
+
+    function redeem(
+        uint256 shares,
+        address,
+        address
+    ) public override returns (uint256 assets) {
+        bool isNextRound = currentRoundId == lastDeposits[msg.sender].roundId + 1;
+        super.redeem(shares, msg.sender, msg.sender);
+        if (isNextRound && shares > 0) {
+            if (shares <= lastDeposits[msg.sender].shares) {
+                uint256 withdrawAssets = convertToAssets(shares);
+                bool condition = withdrawAssets <= lastDeposits[msg.sender].amount;
+                if (!condition) {
+                    emit AssertionFailed(condition);
+                }
+
+                // assert(withdrawAssets <= lastDeposits[owner].amount);
+            }
+        }
     }
 
     function transfer(address to, uint256 amount) public override returns (bool) {
