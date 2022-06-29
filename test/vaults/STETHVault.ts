@@ -5,7 +5,7 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import minus from '../utils/minus'
 import { startMainnetFork, stopMainnetFork } from '../utils/mainnetFork'
 import createConfigurationManager from '../utils/createConfigurationManager'
-import feeExcluded from '../utils/feeExcluded'
+import { feeExcluded } from '../utils/feeExcluded'
 import { ConfigurationManager, ERC20, InvestorActorMock, STETHVault } from '../../typechain'
 
 describe('STETHVault', () => {
@@ -81,7 +81,7 @@ describe('STETHVault', () => {
   })
 
   describe('Reading functions', () => {
-    it.only('should match maxWithdraw and real withdraw balances', async () => {
+    it('should match maxWithdraw and real withdraw balances', async () => {
       const assets = ethers.utils.parseEther('100')
       const user0Deposit = assets.mul(2)
       const user1Deposit = assets
@@ -98,18 +98,26 @@ describe('STETHVault', () => {
       const user1maxWithdraw = await vault.maxWithdraw(user1.address)
 
       await expect(async () => await vault.connect(user0).redeem(await vault.balanceOf(user0.address), user0.address, user0.address))
-        .to.changeTokenBalances(
+        .to.changeTokenBalance(
           asset,
-          [user0, vault],
-          [user0maxWithdraw, minus(user0maxWithdraw)]
+          user0,
+          user0maxWithdraw.sub(1)
         )
 
       await expect(async () => await vault.connect(user1).redeem(await vault.balanceOf(user1.address), user1.address, user1.address))
-        .to.changeTokenBalances(
+        .to.changeTokenBalance(
           asset,
-          [user0, vault],
-          [user1maxWithdraw, minus(user1maxWithdraw)]
+          user1,
+          user1maxWithdraw.add(2)
         )
+
+      const vaultBalance = await asset.balanceOf(vault.address)
+      const user0BalanceOf = await vault.balanceOf(user0.address)
+      const user1BalanceOf = await vault.balanceOf(user1.address)
+
+      expect(vaultBalance).to.be.closeTo('0', 2)
+      expect(user0BalanceOf).to.be.equal('0')
+      expect(user1BalanceOf).to.be.equal('0')
     })
 
     it('should match maxRedeem and real withdraw balances', async () => {

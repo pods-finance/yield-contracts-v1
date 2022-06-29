@@ -3,7 +3,7 @@ import { ethers } from 'hardhat'
 import { BigNumber } from 'ethers'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import createConfigurationManager from '../utils/createConfigurationManager'
-import feeExcluded from '../utils/feeExcluded'
+import { feeExcluded } from '../utils/feeExcluded'
 import { Asset, ConfigurationManager, YieldSourceMock, YieldVaultMock } from '../../typechain'
 
 describe('BaseVault', () => {
@@ -92,7 +92,8 @@ describe('BaseVault', () => {
       const user1AfterBalance = await asset.balanceOf(user1.address)
 
       expect(user0maxWithdraw).to.be.equal(user0AfterBalance)
-      expect(user1maxWithdraw).to.be.equal(user1AfterBalance)
+      // The last user receives dust from the contract
+      expect(user1maxWithdraw).to.be.closeTo(user1AfterBalance, 1)
     })
 
     it('should match maxRedeem and real withdraw balances', async () => {
@@ -120,6 +121,13 @@ describe('BaseVault', () => {
       expect(user0maxRedeem).to.be.equal(user0maxShares)
       expect(user1maxRedeem).to.be.equal(user1maxShares)
     })
+  })
+
+  it('has the max fee ratio capped to MAX_WITHDRAW_FEE', async () => {
+    // Setting fees to 100%
+    await configuration.setParameter(vault.address, ethers.utils.formatBytes32String('WITHDRAW_FEE_RATIO'), 10000)
+
+    expect(await vault.withdrawFeeRatio()).to.be.equal(await vault.MAX_WITHDRAW_FEE())
   })
 
   it('deposit assets and receive shares', async () => {
