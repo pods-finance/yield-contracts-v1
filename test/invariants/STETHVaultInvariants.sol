@@ -95,7 +95,7 @@ contract STETHVaultInvariants is STETHVault, FuzzyAddresses {
     only the entire queue size
      */
     //
-    function helpDeploy(uint256 a) public {
+    function helpProcessQueue(uint256 endIndex) public {
         if (a > depositQueueSize()) return;
         uint256 startIndex = 0;
         uint256 endIndex = a;
