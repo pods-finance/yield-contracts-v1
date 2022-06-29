@@ -90,9 +90,9 @@ contract STETHVaultInvariants is STETHVault, FuzzyAddresses {
     }
 
     /**
-     * @dev This function helps the speed of the fuzzyer to quickly processDeposits in the right way
-    The variable a its just a random factor to it to enable process in chunks instead of processing
-    only the entire queue size
+     * @dev This function helps the fuzzyer to quickly processDeposits in the right way.
+    The variable endIndex its just a random factor to enable process in chunks instead of processing
+    only the entire queue size.
      */
     //
     function helpProcessQueue(uint256 endIndex) public {
