@@ -89,6 +89,12 @@ contract STETHVaultInvariants is STETHVault, FuzzyAddresses {
         return sumBalances == totalSupply();
     }
 
+    /**
+     * @dev This function helps the speed of the fuzzyer to quickly processDeposits in the right way
+    The variable a its just a random factor to it to enable process in chunks instead of processing
+    only the entire queue size
+     */
+    //
     function helpDeploy(uint256 a) public {
         if (a > depositQueueSize()) return;
         uint256 startIndex = 0;
@@ -121,9 +127,9 @@ contract STETHVaultInvariants is STETHVault, FuzzyAddresses {
         if (isNextRound && assets > 0) {
             uint256 burnShares = previewWithdraw(assets);
             if (burnShares <= lastDeposits[msg.sender].shares) {
-                bool condition = assets <= lastDeposits[msg.sender].amount;
-                if (!condition) {
-                    emit AssertionFailed(condition);
+                bool isWithdrawLowerThanInitial = assets <= lastDeposits[msg.sender].amount;
+                if (!isWithdrawLowerThanInitial) {
+                    emit AssertionFailed(isWithdrawLowerThanInitial);
                 }
             }
         }
@@ -139,12 +145,10 @@ contract STETHVaultInvariants is STETHVault, FuzzyAddresses {
         if (isNextRound && shares > 0) {
             if (shares <= lastDeposits[msg.sender].shares) {
                 uint256 withdrawAssets = convertToAssets(shares);
-                bool condition = withdrawAssets <= lastDeposits[msg.sender].amount;
-                if (!condition) {
-                    emit AssertionFailed(condition);
+                bool isWithdrawLowerThanInitial = withdrawAssets <= lastDeposits[msg.sender].amount;
+                if (!isWithdrawLowerThanInitial) {
+                    emit AssertionFailed(isWithdrawLowerThanInitial);
                 }
-
-                // assert(withdrawAssets <= lastDeposits[owner].amount);
             }
         }
     }
