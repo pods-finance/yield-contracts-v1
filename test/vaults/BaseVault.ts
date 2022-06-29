@@ -65,7 +65,7 @@ describe('BaseVault', () => {
     })
   })
 
-  describe.only('Reading functions', () => {
+  describe('Reading functions', () => {
     it('should match maxWithdraw and real withdraw balances', async () => {
       const assets = ethers.utils.parseEther('100')
       const user0Deposit = assets.mul(2)
@@ -75,7 +75,7 @@ describe('BaseVault', () => {
       await asset.connect(user1).mint(user1Deposit)
       // Round 0
       await vault.connect(user0).deposit(user0Deposit, user0.address)
-      await vault.connect(user1).deposit(assets, user1.address)
+      await vault.connect(user1).deposit(user1Deposit, user1.address)
       await vault.connect(vaultController).endRound()
       await vault.connect(vaultController).processQueuedDeposits(0, await vault.depositQueueSize())
       // Round 1
@@ -104,7 +104,7 @@ describe('BaseVault', () => {
       await asset.connect(user1).mint(user1Deposit)
       // Round 0
       await vault.connect(user0).deposit(user0Deposit, user0.address)
-      await vault.connect(user1).deposit(assets, user1.address)
+      await vault.connect(user1).deposit(user1Deposit, user1.address)
       await vault.connect(vaultController).endRound()
       await vault.connect(vaultController).processQueuedDeposits(0, await vault.depositQueueSize())
       // Round 1
